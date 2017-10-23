@@ -2,12 +2,12 @@ CC		= nvcc
 EXEC	= out
 
 SOURCES = \
-cuda_mmult_kernels.cu \
-cuda_mmult.cu
+cuda_mmult_kernels.c \
+cuda_mmult.c
 
-OBJS = $(SOURCES:.cu=.o)
+OBJS = $(SOURCES:.c=.o)
 
-%.o: %.cu
+%.o: %.c
 	$(CC) -c -O3 -o $@ $<
 
 all: $(OBJS)
