@@ -7,7 +7,7 @@ cuda_mmult.cu
 
 OBJS = $(SOURCES:.cu=.o)
 
-%.o: %.c
+%.o: %.cu
 	$(CC) -c -O3 -o $@ $<
 
 all: $(OBJS)
