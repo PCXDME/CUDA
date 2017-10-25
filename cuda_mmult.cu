@@ -85,13 +85,13 @@ int main(int argc, char *argv[]) {
    
    float *Ad, *Bd, *Cd;
    
-   cudaMalloc((void**)&Ad, size); checkCUDAError("allocate memory for A");
-   cudaMalloc((void**)&Bd, size); checkCUDAError("allocate memory for B");
-   cudaMalloc((void**)&Cd, size); checkCUDAError("allocate memory for C");
+   cudaMalloc((void**)&Ad, size); checkCUDAError("cannot allocate memory for Ad");
+   cudaMalloc((void**)&Bd, size); checkCUDAError("cannot allocate memory for Bd");
+   cudaMalloc((void**)&Cd, size); checkCUDAError("cannot allocate memory for Cd");
 
-   cudaMemcpy(Ad,A, size, cudaMemcpyHostToDevice); checkCUDAError("memory of A not transferred");
-   cudaMemcpy(Bd,B, size, cudaMemcpyHostToDevice); checkCUDAError("memory of B not transferred");
-   cudaMemcpy(Cd,C, size, cudaMemcpyHostToDevice); checkCUDAError("memory of C not transferred");
+   cudaMemcpy(Ad,A, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy A to Ad“);
+   cudaMemcpy(Bd,B, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy B to Bd“);
+   cudaMemcpy(Cd,C, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy C to Cd");
 
    /* perform matrix multiplication (m repeats) */
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 
    /* transfer result matrix back from device to host memory and deallocate device matrices */
 
-   cudaMemcpy(C,Cd, size, cudaMemcpyDeviceToHost); checkCUDAError("memory of C not transferred back");
+   cudaMemcpy(C,Cd, size, cudaMemcpyDeviceToHost); checkCUDAError("cannot copy Cd to C");
 
    cudaFree(Ad);
    cudaFree(Bd);
