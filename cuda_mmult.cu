@@ -180,8 +180,10 @@ void CPU_matrixMult(float *A, float *B, float *C, int n, int repeats) {
  *      "Programming Massively Parallel Processors, chapter 3)
  */
 __host__ void CUDA_matrixMult(float *Ad, float *Bd, float *Cd, int n, int repeats) {
-   dim3 dimBlock(n,n);
-   dim3 dimGrid(1,1);
+   dim3 dimBlock(TILE_SIZE,TILE_SIZE);
+   //Round grid size up
+   int grid_size = n % TILE_SIZE != 0 ? (n / TILE_SIZE + 1) : (n / TILE_SIZE);
+   dim3 dimGrid(grid_size ,grid_size);
    
    for(int i=0; i<repeats; i++) {
        matrixMultKernel_global<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);

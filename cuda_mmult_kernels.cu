@@ -9,18 +9,20 @@
  */
 __global__ void matrixMultKernel_global(float* Ad, float* Bd, float* Cd, int n)
 {
-   int i = threadIdx.x;
-   int k = threadIdx.y;
+   int i = blockIdx.x * TILE_SIZE + threadIdx.x;
+   int k = blockIdx.y * TILE_SIZE + threadIdx.y;
    
-   float Celem = 0;
-   
-   for(int j=0; j<n; j++) {
-      float Aelem = Ad[i*n+j];
-      float Belem = Bd[j*n+k];
-      Celem += Aelem*Belem;
+   if(i < n && k < n) {
+    float Celem = 0;
+    
+    for(int j=0; j<n; j++) {
+        float Aelem = Ad[i*n+j];
+        float Belem = Bd[j*n+k];
+        Celem += Aelem*Belem;
+    }
+    
+    Cd[i*n+k] += Celem;
    }
-   
-   Cd[i*n+k] += Celem;
 }
 
 /* 
