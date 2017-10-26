@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
    cudaMalloc((void**)&Bd, size); checkCUDAError("cannot allocate memory for Bd");
    cudaMalloc((void**)&Cd, size); checkCUDAError("cannot allocate memory for Cd");
 
-   cudaMemcpy(Ad,A, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy A to Ad“);
-   cudaMemcpy(Bd,B, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy B to Bd“);
+   cudaMemcpy(Ad,A, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy A to Ad");
+   cudaMemcpy(Bd,B, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy B to Bd");
    cudaMemcpy(Cd,C, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy C to Cd");
 
    /* perform matrix multiplication (m repeats) */
