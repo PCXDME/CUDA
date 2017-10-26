@@ -43,6 +43,7 @@ __global__ void matrixMultKernel_tiled(float* Ad, float* Bd, float* Cd, int n)
    
    int i = blockIdx.x * TILE_SIZE + tx;
    int k = blockIdx.y * TILE_SIZE + ty;
+   
    float Celem = 0;
 
    //Do for grid size
