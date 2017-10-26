@@ -10,7 +10,7 @@
 #include "cuda_mmult_kernels.h"
 
 // define macro OUTPUT to print input & output matrix
-#define OUTPUT
+//#define OUTPUT
 
 // define macro QUERY_DEVICES to print device information
 #define QUERY_DEVICES
