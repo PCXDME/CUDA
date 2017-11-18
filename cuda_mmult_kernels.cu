@@ -151,6 +151,6 @@ __global__ void matrixMultKernel_overlap(float* Ad, float* Bd, float* Cd, int n)
 	for(int j=0; j<TILE_SIZE; j++)
 		Celem += Ads[ty][j]*Bds[j][tx];
 	
-	// 8. Reduce result back
+	// Reduce result back
 	Cd[i*n+k] += Celem;
 }
