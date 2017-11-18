@@ -107,5 +107,50 @@ __global__ void matrixMultKernel_coalesced(float* Ad, float* Bd, float* Cd, int 
  */
 __global__ void matrixMultKernel_overlap(float* Ad, float* Bd, float* Cd, int n)
 {
-   /* TODO: implement overlapped matrix multiplication */
+	__shared__ float Ads[TILE_SIZE][TILE_SIZE];
+	__shared__ float Bds[TILE_SIZE][TILE_SIZE];
+
+	int tx = threadIdx.x;
+	int ty = threadIdx.y;
+
+	int i = blockIdx.y * TILE_SIZE + ty;
+	int k = blockIdx.x * TILE_SIZE + tx;
+
+	float Celem = 0;
+	
+	// 1. load first tile into register(s)
+	float RegisterAd = Ad[ (i)  *n + (tx) ];
+	float RegisterBd = Bd[ (ty) *n + (k) ];
+
+	for(int m=1; m < n/TILE_SIZE; m++) {
+		// 2. copy register(s) to shared memory
+		Ads[ty][tx] = RegisterAd;
+		Bds[ty][tx] = RegisterBd;
+		
+		// 3. barrier
+		__syncthreads();
+		
+		// 4. load next tile into register(s)
+		RegisterAd = Ad[ (i)              *n + (m*TILE_SIZE+tx) ];
+		RegisterBd = Bd[ (m*TILE_SIZE+ty) *n + (k)              ];
+		
+		// 5. compute current tile
+		for(int j=0; j<TILE_SIZE; j++)
+			Celem += Ads[ty][j]*Bds[j][tx];
+		
+		// 6. barrier
+		__syncthreads();
+	};
+	
+	// 7. compute last tile
+	Ads[ty][tx] = RegisterAd;
+	Bds[ty][tx] = RegisterBd;
+	
+	__syncthreads();
+	
+	for(int j=0; j<TILE_SIZE; j++)
+		Celem += Ads[ty][j]*Bds[j][tx];
+	
+	// 8. Reduce result back
+	Cd[i*n+k] += Celem;
 }
