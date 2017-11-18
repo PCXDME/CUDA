@@ -13,7 +13,7 @@
 //#define OUTPUT
 
 // define macro QUERY_DEVICES to print device information
-#define QUERY_DEVICES
+//#define QUERY_DEVICES
 
 void checkCUDAError(const char *msg);
 
@@ -60,6 +60,11 @@ int main(int argc, char *argv[]) {
    n = atoi(argv[1]);
    m = atoi(argv[2]);
 
+   if (n % TILE_SIZE != 0) {
+      printf("Error: matrix size has to be a multiple of tile size %d \n", TILE_SIZE);
+      exit(1);      
+   };
+
    cudaEventCreate(&start_timer);
    cudaEventCreate(&stop_timer);
 
@@ -85,13 +90,13 @@ int main(int argc, char *argv[]) {
    
    float *Ad, *Bd, *Cd;
    
-   cudaMalloc((void**)&Ad, size); checkCUDAError("cannot allocate memory for Ad");
-   cudaMalloc((void**)&Bd, size); checkCUDAError("cannot allocate memory for Bd");
-   cudaMalloc((void**)&Cd, size); checkCUDAError("cannot allocate memory for Cd");
+   cudaMalloc((void**)&Ad, size); checkCUDAError("allocate memory for A");
+   cudaMalloc((void**)&Bd, size); checkCUDAError("allocate memory for B");
+   cudaMalloc((void**)&Cd, size); checkCUDAError("allocate memory for C");
 
-   cudaMemcpy(Ad,A, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy A to Ad");
-   cudaMemcpy(Bd,B, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy B to Bd");
-   cudaMemcpy(Cd,C, size, cudaMemcpyHostToDevice); checkCUDAError("cannot copy C to Cd");
+   cudaMemcpy(Ad,A, size, cudaMemcpyHostToDevice); checkCUDAError("memory of A not transferred");
+   cudaMemcpy(Bd,B, size, cudaMemcpyHostToDevice); checkCUDAError("memory of B not transferred");
+   cudaMemcpy(Cd,C, size, cudaMemcpyHostToDevice); checkCUDAError("memory of C not transferred");
 
    /* perform matrix multiplication (m repeats) */
 
@@ -102,7 +107,7 @@ int main(int argc, char *argv[]) {
 
    /* transfer result matrix back from device to host memory and deallocate device matrices */
 
-   cudaMemcpy(C,Cd, size, cudaMemcpyDeviceToHost); checkCUDAError("cannot copy Cd to C");
+   cudaMemcpy(C,Cd, size, cudaMemcpyDeviceToHost); checkCUDAError("memory of C not transferred back");
 
    cudaFree(Ad);
    cudaFree(Bd);
@@ -181,15 +186,14 @@ void CPU_matrixMult(float *A, float *B, float *C, int n, int repeats) {
  */
 __host__ void CUDA_matrixMult(float *Ad, float *Bd, float *Cd, int n, int repeats) {
    dim3 dimBlock(TILE_SIZE,TILE_SIZE);
-   //Round grid size up
-   int grid_size = n % TILE_SIZE != 0 ? (n / TILE_SIZE + 1) : (n / TILE_SIZE);
-   dim3 dimGrid(grid_size ,grid_size);
+   dim3 dimGrid(n/TILE_SIZE,n/TILE_SIZE);
    
    for(int i=0; i<repeats; i++) {
-       //matrixMultKernel_global<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
-       matrixMultKernel_tiled<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      // matrixMultKernel_global<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      //  matrixMultKernel_tiled<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      matrixMultKernel_coalesced<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      // matrixMultKernel_overlap<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
    }
-
    checkCUDAError("matrix multiplication kernel failed");
 }
 

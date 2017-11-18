@@ -1,4 +1,4 @@
-CC		= nvcc 
+CC		= nvcc
 EXEC	= out
 
 SOURCES = \
