@@ -1,17 +1,24 @@
-CC		= nvcc
-EXEC	= out
+CXX := g++
+CC := gcc 
+LINK := nvcc
+NVCC := nvcc -ccbin /usr/bin
 
-SOURCES = \
-cuda_mmult_kernels.cu \
-cuda_mmult.cu
+INCLUDES    = -I. $$CUDA_INC
+LIBS        = $$CUDA_LIB
 
-OBJS = $(SOURCES:.cu=.o)
+OBJS = mmio.c.o main.c.o kernels.cu.o pagerank.c.o poisson.c.o
+TARGET = sparse
+LINKLINE = $(LINK) -o $(TARGET) $(OBJS) $(LIBS)
 
-%.o: %.cu
-	$(CC) -c -O3 -o $@ $<
+.SUFFIXES: .c .cpp .cu .o
 
-all: $(OBJS)
-	$(CC) -link -L/usr/local/cuda/lib64/ -O3 $(OBJS) -o $(EXEC)
-
+$(TARGET): $(OBJS)
+	$(LINKLINE)
+%.c.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+%.cu.o: %.cu
+	$(NVCC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 clean:
-	@rm -f $(OBJS) $(EXEC)
+	rm -rf *.o $(TARGET)
+all: $(TARGET)
+
